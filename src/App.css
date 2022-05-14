@@ -1,0 +1,17 @@
+.App {
+  display: grid;
+  place-items: center;
+  /* background-color: rgb(242, 236, 255); */
+  background-image: url("https://wallpaperaccess.com/full/187170.jpg");
+  background-size: 1550px;
+  background-position: center;
+  height: 100vh;
+}
+
+.App-body {
+  display: flex;
+  background-color: white;
+  height: 90vh;
+  width: 200vh;  
+  box-shadow: -1px 4px 20px -6px rgb(0, 0, 0);
+}

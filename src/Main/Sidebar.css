@@ -1,0 +1,101 @@
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    flex: 0.27;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    border-right: 1px solid rgb(241, 241, 241);
+    background-color: rgb(253, 180, 223);
+
+}
+
+
+.sidebar-header > img {
+  height: 40px;
+  width: 40px;
+}
+
+.sidebar-headerRight {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 100px;
+}
+
+.sidebar-header > .sidebar-headerRight > input {
+  padding-right: 20vw;
+}
+
+.sidebar-search {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    height: 39px;
+    padding: 10px;
+}
+
+.sidebar-searchContainer {
+    display: flex;
+    align-items: center;
+    background-color: rgb(250, 246, 241);
+    height: 35px;
+    font-size: small;
+    width: 100%;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.sidebar-searchContainer>input {
+    flex: 1;
+    border: rgb(249, 238, 238);
+    margin-left: 10px;
+    background-color: rgb(250, 246, 241);
+    border-radius: 5px;
+    height: 23px;
+    padding: 10px;
+}
+
+.sidebar-chats {
+    flex: 1;
+    min-width: 27%;
+    background-color: white;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    scrollbar-width: none !important;
+    scrollbar-color: white transparent;
+}
+
+.modal-header > h5 {
+  font-size: 12px;
+  font-weight: bold;
+  color: rgb(125, 121, 121);
+}
+
+.modal-body > button {
+  margin-left: 39%;
+  margin-right: 35%;
+}
+
+.modal-body > input {
+    padding-right: 17vw;
+}
+
+.modal-body > p {
+  color: #ff4271;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.sidebar-header > .user-name {
+    margin-left: -7vw;
+    margin-top: 1vh;
+}
+
+.sidebar-header > .user-name > h6 {
+    font-weight: bolder;
+}

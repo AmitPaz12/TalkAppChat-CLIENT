@@ -1,0 +1,11 @@
+.record > audio {
+  place-items: center;
+  align-items: center;
+  position: center;
+  display: flex;
+  margin-left: 250px;
+  margin-right: auto;
+  vertical-align: middle;
+  border-radius: 1px;
+  color: red;
+}

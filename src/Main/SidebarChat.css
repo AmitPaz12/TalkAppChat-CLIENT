@@ -1,0 +1,6 @@
+.sidebarChat {
+    display: flex;
+    flex: 0.27;
+    flex-direction: column;
+}
+

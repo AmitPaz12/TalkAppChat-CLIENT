@@ -1,0 +1,8 @@
+.page{
+  flex: 0.73;
+    background-image: url("https://i.pinimg.com/1200x/e0/f6/f0/e0f6f0617909252c8b4623d6455f633c.jpg");
+    background-size: 1200px;
+    background-position: center;
+    display: grid;
+  position: relative;
+}

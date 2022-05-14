@@ -1,0 +1,55 @@
+.ContactItem{
+    display: flex;
+    cursor: pointer;
+    border-bottom: 1px solid rgb(234, 223, 223);
+    padding-top: 15px;
+    text-decoration: none;
+    min-height: 12vh; 
+}
+
+.ContactItem > img {
+  height: 40px;
+  width: 40px;
+  margin-left: 1vw;
+}
+
+.ContactItem-info{
+    margin-left: 15px;
+    width: 280px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-decoration: none;
+}
+
+.ContactItem-info>h1:hover {
+    color:black;
+    text-decoration: none;
+}
+
+.ContactItem-info>h1 {
+    font-size: 16px;
+    color: rgb(125, 121, 121);
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-decoration: none;
+}
+
+.ContactItem-info>h2 {
+    font-size: 13px;
+    color: rgb(125, 121, 121);
+    text-decoration: none;
+}
+
+.ContactItem-info>p {
+    font-size: 10px;
+    color: rgb(125, 121, 121);
+    text-align: right;
+    padding-right:2px;
+    margin-right: 2px;
+}
+
+.ContactItem:hover {
+    background-color: rgb(244, 239, 239);
+    text-decoration: none;
+}
