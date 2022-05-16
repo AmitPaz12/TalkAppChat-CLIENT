@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useContext} from 'react';
 import { Link } from "react-router-dom";
 import "./Register.css";
+import defaultProfilePic from "../ProfilePics/photo6.jpg";
 import { UserContext } from '../UserContext'
 
 function Register() {
@@ -13,16 +14,16 @@ function Register() {
   
 	const {user, setUser} = useContext(UserContext);
 
-  const handleEnter = (e) => {
+  const handleEnter = async (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleSubmit();
+      await handleSubmit();
     }
   }
   
   // handle submiting, click on Register
-	const handleSubmit = () => {
-    setFieldErrors(validate(fieldData));
+	const handleSubmit = async () => {
+    setFieldErrors(await validate(fieldData));
     setIsSubmit(true);
 	}
 
@@ -36,7 +37,8 @@ function Register() {
   // function for handling the changed of the data when enterd the username & password
 	const handleChange = (e) => {
     if (fieldErrors !== ""){
-      setFieldErrors("");
+      setFieldErrors({});
+      setIsSubmit(false);
     }
 		const {name, value} = e.target;
 		setFieldData({...fieldData, [name]: value});
@@ -45,12 +47,16 @@ function Register() {
 
   useEffect(() => {
     if(Object.keys(fieldErrors).length === 0 && isSubmit){
-        setUser({...user, userName: fieldData.userField, password: fieldData.passwordField, displayName: fieldData.nicknameField, profilePic: fieldData.photoField, contacts: []});
+      async function fetchData(){
+        const userFromDB = await VerifyUser();
+        if(userFromDB == null)
+          return;
+          userFromDB.profilePic = defaultProfilePic;
+        setUser(userFromDB)
+      }
+      fetchData();
     }
-    setIsSubmit(false);
-  },[fieldErrors, fieldData])
-
-
+  },[fieldErrors])
 
 
   async function VerifyUser() {
@@ -59,48 +65,65 @@ function Register() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userName: fieldData.userField, password: fieldData.passwordField, displayName: fieldData.nicknameField, profilePic: fieldData.photoField})
     };
-    const response = await fetch('https://localhost:7201/api/Users/register', requestOptions);
-    if (response.status === 400){
-      fieldErrors.userExists = "you are already in! click Sign in";
-      return null;
-    }
-      
-    const userTokenObject = await response.json();
-    const JWTtoken = userTokenObject.token
-    const user = userTokenObject.user
-    localStorage.setItem("jwt_token", JWTtoken);
-    return user;
+
+  
+    await fetch('https://localhost:7201/api/Users/register', requestOptions)
+          .then(response => {
+            if (response.ok){
+              const userTokenObject = response.json();
+              const JWTtoken = userTokenObject.token
+              const user = userTokenObject.user
+              console.log(userTokenObject);
+              localStorage.setItem("jwt_token", JWTtoken);
+              return user;
+            }
+            setFieldErrors({userExists: "you are already in! click Sign in"});
+          })
+    console.log(fieldErrors);
+    return null;
+
+    // const response = await fetch('https://localhost:7201/api/Users/register', requestOptions);
+
+    // if(!checkResponseStatus(response))
+    //   return null;
+  
+    // const userTokenObject = await response.json();
+    // const JWTtoken = userTokenObject.token
+    // const user = userTokenObject.user
+    // console.log(userTokenObject);
+    // localStorage.setItem("jwt_token", JWTtoken);
+    // return user;
   }
 
 
 
-  const validate = async (values) => {
-    const errors = {}
-    const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{5,}$/;
-    const user = await VerifyUser();
-    if (!values.userField){
-      errors.userField = "Username is required!";
-    }
-    if (!values.passwordField){
-      errors.passwordField = "Password is required!";
-    } else if (!regex.test(values.passwordField) && !user) {
-      errors.passwordField = "Password must contain minimum five characters, at least one letter and one number."
-    }
-    if (!values.verifyPasswordField){
-      errors.verifyPasswordField = "Verify password is required!";
-    } else if (values.verifyPasswordField !== values.passwordField) {
-      errors.verifyPasswordField = "Passwords are incompatible!"
-    }
-
-    if (!values.nicknameField){
-      errors.nicknameField = "Nickname is required!";
-    }
-    if (!values.photoField){
-      errors.photoField = "Photo is required!";
-    }
-    
-    return errors;
+async function validate(values) {
+  const errors = {}
+  const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{5,}$/;
+  if (!values.userField){
+    errors.userField = "Username is required!";
   }
+  if (!values.passwordField){
+    errors.passwordField = "Password is required!";
+  } else if (!regex.test(values.passwordField)) {
+    errors.passwordField = "Password must contain minimum five characters, at least one letter and one number."
+  }
+  if (!values.verifyPasswordField){
+    errors.verifyPasswordField = "Verify password is required!";
+  } else if (values.verifyPasswordField !== values.passwordField) {
+    errors.verifyPasswordField = "Passwords are incompatible!"
+  }
+
+  if (!values.nicknameField){
+    errors.nicknameField = "Nickname is required!";
+  }
+  if (!values.photoField){
+    errors.photoField = "Photo is required!";
+  }
+  
+  return errors;
+}
+
   
   return (
     <div className="register">

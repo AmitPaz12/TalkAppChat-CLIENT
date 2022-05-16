@@ -5,8 +5,6 @@ import Image from 'react-bootstrap/Image'
 
 
 function ContactItem({id, profilePic, name, lastMessage, icon, time}) {
-  console.log(profilePic);
-  
   return (
     <Link to={`/rooms/${id}`} style={{ textDecoration: 'none' }}>
     <div className="ContactItem">

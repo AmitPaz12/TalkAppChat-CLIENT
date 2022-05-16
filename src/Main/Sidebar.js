@@ -10,10 +10,12 @@ import Image from 'react-bootstrap/Image'
 function Sidebar() {
 
 	const {user, setUser} = useContext(UserContext);
-  const [addFieldError, setAddFieldError] = useState('');
+  const [addFieldError, setAddFieldError] = useState({});
   const [openChatFieldError, setOpenChatFieldError] = useState('');
   const [input, setInput] = useState({inputField:""});
+  const [fieldData, setFieldData] = useState({idField: '', nameField: '', serverField: ''});
   const [isClosed, setIsClosed] = useState(false);
+  const [addChat, setAddChat] = useState(false);
   const [isLogout, setIsLogout] = useState(false);
   const [isOpenChat, setIsOpenChat] = useState(false);
   var [chatsList, setChatsList] = useState(null);
@@ -21,20 +23,23 @@ function Sidebar() {
 
   useEffect(() => {
     async function fetchData(){
+      let userContacts = [];
       const requestOptions = {
         method: 'GET',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`},
       }
-      let response = await fetch('https://localhost:7201/api/Contacts', requestOptions);
-      let userContacts = response.json();
-      if (userContacts != null){
+
+      await fetch('https://localhost:7201/api/Contacts', requestOptions)
+        .then(response => response.json())
+        .then(responseJson => {userContacts = responseJson})
+        .catch((error) => {userContacts = []});
+
         setChatsList(userContacts);
-        setUser({...user, contacts:[...chatsList,]});
-        console.log(chatsList);
-      }
+        setUser({...user, contacts:chatsList});
+
     }
     fetchData();
-  })
+  },[isClosed])
 
   
   const doSearch = function(q) {
@@ -48,27 +53,67 @@ function Sidebar() {
   const searchBox = useRef(null);
 
   const checkIfExists = () => {
+
+
     return user.contacts.find((element) => {
 			return (element.name === input.inputField);
     });
   }
+
+
+async function postNewContact() {
+  let contact = null;
+  console.log("ffff");
+  const requestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem("jwt_token")}`},
+    body: JSON.stringify({ Id: fieldData.idField, Name: fieldData.nameField, Server: fieldData.serverField})
+  }
+
+  await fetch('https://localhost:7201/api/Contacts', requestOptions)
+  .then(async response => {
+    console.log(await response.status);
+    if (await response.status === 201){
+      return;
+    }
+    setAddFieldError({contactExists: "You already have this contact. Please choose another"});
+  });
+}
+
+
+  useEffect(() => {
+    console.log("entered useeffect");
+    async function fetchData(){
+      await postNewContact();
+  }
+  fetchData();
+  setFieldData({idField: '', nameField: '', serverField: ''});
+},[addChat])
+
+  const validate = (values) => {
+    const errors = {}
+    if(!values.idField || !values.nameField || !values.serverField){
+      if (!values.idField){
+        errors.idField = "This field is required!";
+      }
+      if (!values.nameField){
+        errors.nameField = "This field is required!";
+      }
+      if (!values.serverField)
+        errors.serverField = "This field is required!";
+    }
+    return errors;
+  }
   
   const handleAdd = () => {
-    if (input.inputField === "") {
-      setAddFieldError("This field is required!");
-    } else if(input.inputField !== ""){
-      if (checkIfExists()) {
-        setAddFieldError("You already have a contact with this name. Please choose another name");
-      } else {
-        var obj = {id: chatsList.length +1, name: input.inputField, profilePic: defaultProfilePic, lastSeen: "", messages: []};
-        chatsList.unshift(obj);
-        setChatsList([...chatsList,])
-        setUser({...user, contacts:[...chatsList,]});
-        setInput({inputField: ''});
-        handleClose();
+    setAddFieldError(validate(fieldData))
+    console.log(Object.keys(addFieldError).length );
+    if(Object.keys(addFieldError).length === 0){
+      console.log(",,,,,,,,");
+      setAddChat(true);
+      handleClose();
       }
     }
-  }
 
   const handleEnterAdd = (e) => {
     if (e.key === 'Enter') {
@@ -93,17 +138,18 @@ function Sidebar() {
   }
 
   const handleAddChange = (e) => {
-    if (addFieldError !== ""){
-      setAddFieldError("");
+    if ((Object.keys(addFieldError).length !== 0)){
+      setAddFieldError({});
     }
     const {name,value} = e.target;
-    setInput({...input,[name]:value});
+    setFieldData({...fieldData,[name]:value});
   }
 
   const Logout = () => {
+    console.log("log out");
     localStorage.removeItem('jwt_token');
-    navigate("../login", { replace: true });
     setUser(null);
+    navigate("../login", { replace: true });
   }
 
   const openChat = () => {
@@ -147,10 +193,15 @@ function Sidebar() {
           <Modal show={isClosed} onHide={handleClose && handleAdd}>
             <Modal.Header>Add new Contact</Modal.Header>
             <Modal.Body>
-              <input value={input.inputField} onKeyPress={handleEnterAdd} onChange={handleAddChange} placeholder="Contact's nickname" name="inputField" type="text" autocomplete="off"/> 
-              <p>{addFieldError}</p>
+              <input value={fieldData.idField} onKeyPress={handleEnterAdd} onChange={handleAddChange} placeholder="Contact's nickname" name="idField" type="text" autocomplete="off"/> 
+              <p>{addFieldError.idField}</p>
+              <input value={fieldData.nameField} onKeyPress={handleEnterAdd} onChange={handleAddChange} placeholder="Contact's nickname" name="nameField" type="text" autocomplete="off"/>
+              <p>{addFieldError.nameField}</p>
+              <input value={fieldData.serverField} onKeyPress={handleEnterAdd} onChange={handleAddChange} placeholder="Contact's nickname" name="serverField" type="text" autocomplete="off"/>
+              <p>{addFieldError.serverField}</p>
             </Modal.Body>
             <Modal.Footer>
+            <p>{addFieldError.contactExists}</p>
               <button onClick={handleAdd} type="button" class="btn btn-outline-primary">Add</button>
               <button onClick={handleClose} type="button" class="btn btn-outline-dark">Close</button>
             </Modal.Footer>

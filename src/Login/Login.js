@@ -15,13 +15,13 @@ function Login() {
 	const {user, setUser} = useContext(UserContext);
 
 
-  function checkResponseStatus(response){
-    if (response.status === 400){
-      if(response.json().data === "Wrong password")
+  async function checkResponseStatus(response){
+    console.log("check response")
+    console.log(response);
+    if(await response === fieldData.passwordField)
         setFieldErrors({wrongPassword: "Sorry, your password was incorrect. Please double-check your password."});
-      if(response.json() === "User does not exists")
+      if(await response === fieldData.userField)
         setFieldErrors({wrongUserName: "Username or password is wrong! Try again"});
-    }
   }
 
   async function VerifyUser() {
@@ -30,14 +30,25 @@ function Login() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userName: fieldData.userField, password: fieldData.passwordField })
     };
-    const response = await fetch('https://localhost:7201/api/Users/login', requestOptions);
-    checkResponseStatus(response);
-      
-    const userTokenObject = await response.json();
-    const JWTtoken = userTokenObject.token;
-    const user = userTokenObject.user;
-    localStorage.setItem("jwt_token", JWTtoken);
-    return user;
+    await fetch('https://localhost:7201/api/Users/login', requestOptions)
+    .then(async response => {
+      if(response.status === 200){
+        const userTokenObject = await response.json();
+        const JWTtoken = userTokenObject.token;
+        const user = userTokenObject.user;
+        localStorage.setItem("jwt_token", JWTtoken);
+        console.log(user);
+        setUser(user);
+        return "Ok";
+      }
+      return response.text();
+    })
+    .then(text => {
+      if(text === "Wrong password")
+      setFieldErrors({wrongPassword: "Sorry, your password was incorrect. Please double-check your password."});
+    if(text === "User does not exists")
+      setFieldErrors({wrongUserName: "Username or password is wrong! Try again"});
+    });
   }
 
 
@@ -68,10 +79,7 @@ function Login() {
   useEffect(() => {
     if(Object.keys(fieldErrors).length === 0 && isSubmit){
       async function fetchData(){
-        const userFromDB = await VerifyUser();
-        if(userFromDB == null)
-          return;
-        setUser(userFromDB)
+        await VerifyUser();
       }
       fetchData();
     }
