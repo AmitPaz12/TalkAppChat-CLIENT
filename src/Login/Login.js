@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useContext} from 'react';
 import "./Login.css";
 import { Link } from "react-router-dom";
+import defaultProfilePic from "../ProfilePics/photo6.jpg";
 import { UserContext } from '../UserContext'
 
 function Login() {
@@ -14,15 +15,6 @@ function Login() {
   // create the uset holder
 	const {user, setUser} = useContext(UserContext);
 
-
-  async function checkResponseStatus(response){
-    console.log("check response")
-    console.log(response);
-    if(await response === fieldData.passwordField)
-        setFieldErrors({wrongPassword: "Sorry, your password was incorrect. Please double-check your password."});
-      if(await response === fieldData.userField)
-        setFieldErrors({wrongUserName: "Username or password is wrong! Try again"});
-  }
 
   async function VerifyUser() {
     const requestOptions = {
@@ -38,6 +30,7 @@ function Login() {
         const user = userTokenObject.user;
         localStorage.setItem("jwt_token", JWTtoken);
         console.log(user);
+        user.profilePic = defaultProfilePic;
         setUser(user);
         return "Ok";
       }

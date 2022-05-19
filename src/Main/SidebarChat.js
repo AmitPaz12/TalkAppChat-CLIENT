@@ -6,6 +6,7 @@ import ContactItem from './ContactItem';
 
 function SidebarChat({chatsList}) {
   var contactList = [];
+  console.log(chatsList);
   if(chatsList != null){
     contactList = chatsList.map((contact, key) => {
       if (Array.isArray(contact.messages) && contact.messages.at(-1)) {
@@ -18,8 +19,8 @@ function SidebarChat({chatsList}) {
           } else if(contact.messages){
               return <ContactItem id={contact.id} profilePic={defaultProfilePic} name={contact.name} lastMessage={contact.messages.at(-1).content} icon={""} time={contact.messages.at(-1).timestamp} key={key}/>
         }
-      } else {
-            return <ContactItem id={contact.id} profilePic={defaultProfilePic} name={contact.name} lastMessage={""} icon={""} time={""} key={key}/>;
+      } else if (contact.name !== "") {
+            return <ContactItem id={contact.id} profilePic={defaultProfilePic} name={contact.name} lastMessage={contact.lastMessage} icon={""} time={""} key={key}/>;
       }
   });
 }

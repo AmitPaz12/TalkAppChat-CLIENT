@@ -145,7 +145,7 @@
   width: 300px;
 }
 
-.modal-body > h4 {
+.modal-body-dots > h4 {
   text-align: center;
 }
 
@@ -155,7 +155,7 @@
   color: gray;
 }
 
-.modal-body > img {
+.modal-body-dots > img {
   margin-top: 3vh;
   position: relative;
   left: 36%;

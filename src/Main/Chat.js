@@ -4,6 +4,7 @@ import "./Chat.css"
 import {useParams} from 'react-router-dom'
 import RecordPopup from './RecordPopup';
 import Image from 'react-bootstrap/Image'
+import defaultProfilePic from "../ProfilePics/photo6.jpg";
 // import Picker from 'emoji-picker-react'
 import { Modal } from 'react-bootstrap'
 
@@ -19,6 +20,7 @@ function Chat() {
   const [showRecord, setShowRecord] = useState(false);
   const [isSubmited, setIsSubmited] = useState(false);
   const [record, setRecord] = useState('');
+  var [currentChat, setCurrentChat] = useState(null);
   // const [showEmojis, setShowEmojis] = useState(false);
   const [cursorPos, setCursorPos] = useState();
   const [isOpenInfo, setIsOpenInfo] = useState(false);
@@ -146,23 +148,72 @@ function Chat() {
   //     setLastSeen("Last seen at: " + messages.at(-1).timestamp);
   //   }
   // }, [input]);
+
+  async function getContacts(){
+    let userContacts = [];
+    const requestOptions = {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`},
+    }
+
+    await fetch('https://localhost:7201/api/Contacts', requestOptions)
+      .then(async response => await response.json())
+      .then(responseJson => {userContacts = responseJson})
+      .catch((error) => {userContacts = []});
+
+      console.log(userContacts);
+      // setChatsList(userContacts);
+      setUser(user);
+}
+
+async function getContactInfo(){
+  const requestOptions = {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`},
+  }
+
+  console.log(roomId);
+  await fetch('https://localhost:7201/api/Contacts/' + roomId , requestOptions)
+    .then(async response => setCurrentChat(await response.json()))
+    .catch((error) => {setCurrentChat(null)});
+}
+
+useEffect(() => {
+  if(currentChat){
+    if(currentChat.messages && currentChat.messages.at(-1)){
+      setRoomName(currentChat.name);
+      setLastSeen("Last seen at: " + currentChat.messages.at(-1).timestamp);
+      setMessages(currentChat.messages);
+      setProfilePic(defaultProfilePic);
+      setInput({inputField: ''});
+    } else {
+      setRoomName(currentChat.name);
+      setLastSeen("Active now");
+      setMessages([]);
+      setProfilePic(defaultProfilePic);
+      setInput({inputField: ''});
+    }
+  }
+}, [currentChat])
   
   useEffect(() => {
-    const contact = user.chats.find((element) => {
-			return (element.id == roomId);
-		});
-		if(contact){
-      if(contact.messages.at(-1)){
-        setRoomName(contact.name);
-        setLastSeen("Last seen at: " + contact.messages.at(-1).timestamp);
-        setMessages(contact.messages);
-        setProfilePic(contact.profilePic);
+    async function fetchData(){
+      await getContactInfo();
+    }
+    fetchData();
+
+		if(currentChat){
+      if(currentChat.messages && currentChat.messages.at(-1)){
+        setRoomName(currentChat.name);
+        setLastSeen("Last seen at: " + currentChat.messages.at(-1).timestamp);
+        setMessages(currentChat.messages);
+        setProfilePic(defaultProfilePic);
         setInput({inputField: ''});
       } else {
-        setRoomName(contact.name);
+        setRoomName(currentChat.name);
         setLastSeen("Active now");
-        setMessages(contact.messages);
-        setProfilePic(contact.profilePic);
+        setMessages([]);
+        setProfilePic(defaultProfilePic);
         setInput({inputField: ''});
       }
 		}

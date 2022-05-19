@@ -23,8 +23,8 @@ function Register() {
   
   // handle submiting, click on Register
 	const handleSubmit = async () => {
-    setFieldErrors(await validate(fieldData));
     setIsSubmit(true);
+    setFieldErrors(await validate(fieldData));
 	}
 
   	// This function handles changing of the current photo.
@@ -45,21 +45,8 @@ function Register() {
 	}
 
 
-  useEffect(() => {
-    if(Object.keys(fieldErrors).length === 0 && isSubmit){
-      async function fetchData(){
-        const userFromDB = await VerifyUser();
-        if(userFromDB == null)
-          return;
-          userFromDB.profilePic = defaultProfilePic;
-        setUser(userFromDB)
-      }
-      fetchData();
-    }
-  },[fieldErrors])
-
-
   async function VerifyUser() {
+    let user = null;
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -68,32 +55,36 @@ function Register() {
 
   
     await fetch('https://localhost:7201/api/Users/register', requestOptions)
-          .then(response => {
-            if (response.ok){
-              const userTokenObject = response.json();
-              const JWTtoken = userTokenObject.token
-              const user = userTokenObject.user
-              console.log(userTokenObject);
+          .then(async response => {
+            if (await response.status === 200){
+              const userTokenObject = await response.json();
+              const JWTtoken = userTokenObject.token;
+              user = userTokenObject.user;
+              console.log(user);
               localStorage.setItem("jwt_token", JWTtoken);
-              return user;
+              console.log("return user");
+            } else {
+              setFieldErrors({userExists: "you are already in! click Sign in"});
             }
-            setFieldErrors({userExists: "you are already in! click Sign in"});
           })
-    console.log(fieldErrors);
-    return null;
 
-    // const response = await fetch('https://localhost:7201/api/Users/register', requestOptions);
-
-    // if(!checkResponseStatus(response))
-    //   return null;
-  
-    // const userTokenObject = await response.json();
-    // const JWTtoken = userTokenObject.token
-    // const user = userTokenObject.user
-    // console.log(userTokenObject);
-    // localStorage.setItem("jwt_token", JWTtoken);
-    // return user;
+    return user;
   }
+
+  useEffect(() => {
+    if(Object.keys(fieldErrors).length === 0 && isSubmit){
+      async function fetchData(){
+        const userFromDB = await VerifyUser();
+        console.log(userFromDB);
+        if(userFromDB == null)
+          return;
+          userFromDB.profilePic = defaultProfilePic;
+          console.log("before setUser");
+        setUser(userFromDB)
+      }
+      fetchData();
+    }
+  },[fieldErrors])
 
 
 

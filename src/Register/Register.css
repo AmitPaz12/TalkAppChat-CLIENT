@@ -1,6 +1,7 @@
 .register {
     background-image: url("https://wallpaperaccess.com/full/187170.jpg");
-    background-size: 1535px;
+    background-size: inherit;
+    background-position: center;
     height: 100vh;
     width: 100vw;
     display: grid;
@@ -10,12 +11,15 @@
 
 .register-container {
     background-color: white;
-    padding: 100px;
+    padding-top: 10vh;
+    padding-right: 7vw;
+    padding-left: 7vw;
+    padding-bottom: 10vh;
     max-height: 90%;
-    min-height: 70%;
+    min-height: 90%;
 /*     width: 33vw; */
     max-width: 34%;
-    min-width: 33%;
+    min-width: 32%;
     text-align: center;
     background-color: white;
     border-radius: 10px;
@@ -31,7 +35,7 @@
 
 .register-container > h6 {
     height: 5vh;
-    margin-top: -70px;
+    margin-top:auto;
 }
 
 .register-connect {
@@ -44,7 +48,7 @@
 
 .register-connect > input {
     align-items: center;
-    margin-bottom: 0px;
+    margin-top: 0.5vh;
     height: 35px;
     font-size: small;
     width: 100%;
@@ -62,7 +66,7 @@
 
 .register-container > button {
     align-items: center;
-    margin-top: 20px;
+    margin-top: 7vh;
     font-size: small;
     padding: 4px;
     padding-left: 87px;
