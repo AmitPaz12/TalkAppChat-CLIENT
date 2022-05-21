@@ -12,15 +12,15 @@ function Chat() {
 
   const [roomName, setRoomName] = useState('');
   const [lastSeen, setLastSeen] = useState('');
-  const [messages, setMessages] = useState([]);
   const [stoppedRecording, setStoppedRecording] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
   const [input, setInput]= useState({inputField: ''});
   const [showRecord, setShowRecord] = useState(false);
   const [isSubmited, setIsSubmited] = useState(false);
+  const [messages, setMessages] = useState([]);
   const [record, setRecord] = useState('');
-  var [currentChat, setCurrentChat] = useState(null);
+  var [currentChat, setCurrentChat] = useState({id: '', name: '', server: '', last: '', lastdate: ''});
   // const [showEmojis, setShowEmojis] = useState(false);
   const [cursorPos, setCursorPos] = useState();
   const [isOpenInfo, setIsOpenInfo] = useState(false);
@@ -35,7 +35,12 @@ function Chat() {
   // access the parameters of the current route.
   const { roomId } = useParams();
 
-  
+  // useEffect(() => {
+  //   if ((input.inputField == "") && messages.at(-1)){
+  //     setLastSeen("Last seen at: " + messages.at(-1).timestamp);
+  //   }
+  // }, [input]);
+
   // const handleShowEmojis = () => {
   //   setShowEmojis(!showEmojis);
   //   inputRef.current.focus();
@@ -51,17 +56,96 @@ function Chat() {
   //   setCursorPos(start.length + emoji.length);
   // }
 
-	const handleSubmit = () => {
+  async function transferNewMessage() {
+    let res = null;
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json'},
+      body: JSON.stringify({ from: user.userName, to: currentChat.id, content: input.inputField})
+    }
+  
+    await fetch( 'https://' + currentChat.server + '/api/transfer', requestOptions)
+    .then(async response => {
+      if(response.status === 201){
+        return "Ok";
+      }
+      return await response.text();
+    })
+    .then(text => {res = text});
+    return res;
+  }
+
+  
+async function getContactInfo(){
+  let ret = null;
+  const requestOptions = {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`},
+  }
+  await fetch('https://localhost:7201/api/Contacts/' + roomId , requestOptions)
+    .then(response => response.json())
+    .then(res => {
+      ret = res;
+    })
+    .catch((error) => {
+      console.log("Error")
+      ret = currentChat;
+    });
+
+    return ret;
+}
+
+/**
+ * Post request to server, create new contact
+ */
+ async function postNewMessage() {
+  let ret = false;
+  const requestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem("jwt_token")}`},
+    body: JSON.stringify({ content: input.inputField})
+  }
+  await fetch('https://localhost:7201/api/Contacts/' + roomId + '/Messages/', requestOptions)
+  .then(async response => {
+    if (response.status === 201){
+      ret = true;
+    }});
+  return ret;
+}
+
+async function getMessages(){
+  let messages = [];
+  const requestOptions = {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`},
+  }
+
+  await fetch('https://localhost:7201/api/Contacts/' + roomId + '/Messages/', requestOptions)
+    .then(response => response.json())
+    .then(responseJson => {messages = responseJson})
+    .catch((error) => {messages = []});
+
+    setMessages(messages);
+    return messages;
+}
+
+
+	const handleSubmit = async () => {
     // if(showEmojis){
     //   setShowEmojis(!showEmojis);
     // }
     if(input.inputField){
       var today = new Date();
       var time = String(today.getHours()).padStart(2, "0") + ":" + String(today.getMinutes()).padStart(2, "0");
-      messages.push({name: user.userName, timestamp: time, content: input.inputField, reciver: false});
-      setIsSubmited(true);
-      setInput({inputField: ''});
-      setLastSeen("Last seen at: " + messages.at(-1).timestamp);
+      console.log(time);
+      if(await transferNewMessage()){
+        if(await postNewMessage()){
+          await getMessages();
+          setIsSubmited(true);
+          setInput({inputField: ''});
+          setLastSeen("Last seen at: " + time);
+        }
+      }
     }
     setUser({...user,});
 	}
@@ -143,80 +227,33 @@ function Chat() {
     }
   }, [input]);
 
-  // useEffect(() => {
-  //   if ((input.inputField == "") && messages.at(-1)){
-  //     setLastSeen("Last seen at: " + messages.at(-1).timestamp);
-  //   }
-  // }, [input]);
-
-  async function getContacts(){
-    let userContacts = [];
-    const requestOptions = {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`},
-    }
-
-    await fetch('https://localhost:7201/api/Contacts', requestOptions)
-      .then(async response => await response.json())
-      .then(responseJson => {userContacts = responseJson})
-      .catch((error) => {userContacts = []});
-
-      console.log(userContacts);
-      // setChatsList(userContacts);
-      setUser(user);
-}
-
-async function getContactInfo(){
-  const requestOptions = {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`},
-  }
-
-  console.log(roomId);
-  await fetch('https://localhost:7201/api/Contacts/' + roomId , requestOptions)
-    .then(async response => setCurrentChat(await response.json()))
-    .catch((error) => {setCurrentChat(null)});
-}
 
 useEffect(() => {
-  if(currentChat){
-    if(currentChat.messages && currentChat.messages.at(-1)){
+  if(currentChat.id !== ''){
+    if(messages === [] && messages.at(-1)){
       setRoomName(currentChat.name);
-      setLastSeen("Last seen at: " + currentChat.messages.at(-1).timestamp);
-      setMessages(currentChat.messages);
+      setLastSeen("Last seen at: " + messages.at(-1).lastdate);
       setProfilePic(defaultProfilePic);
       setInput({inputField: ''});
     } else {
       setRoomName(currentChat.name);
       setLastSeen("Active now");
-      setMessages([]);
       setProfilePic(defaultProfilePic);
       setInput({inputField: ''});
     }
   }
 }, [currentChat])
+
   
   useEffect(() => {
+    if(roomId){
+    console.log(roomId);
     async function fetchData(){
-      await getContactInfo();
+      setCurrentChat(await getContactInfo())
+      setMessages(await getMessages())
     }
     fetchData();
-
-		if(currentChat){
-      if(currentChat.messages && currentChat.messages.at(-1)){
-        setRoomName(currentChat.name);
-        setLastSeen("Last seen at: " + currentChat.messages.at(-1).timestamp);
-        setMessages(currentChat.messages);
-        setProfilePic(defaultProfilePic);
-        setInput({inputField: ''});
-      } else {
-        setRoomName(currentChat.name);
-        setLastSeen("Active now");
-        setMessages([]);
-        setProfilePic(defaultProfilePic);
-        setInput({inputField: ''});
-      }
-		}
+  }
   }, [roomId])
 
 
@@ -236,7 +273,6 @@ useEffect(() => {
       }
     }
   }
-  
   setInterval(scrollToEnd, 30);
 
   const handleOpenInfo = () => {
@@ -270,12 +306,11 @@ useEffect(() => {
 
         </div>
       </div>
-
       <div className="chat-body" id="chat-body">
-        
+        {console.log(messages)}
         {messages ? (messages.map((message) => (
-          <p className={`chat-message ${(message.name === user.userName) && "chat-reciever"}`}>{message.content}
-            <span className="chat-timestamp">{message.timestamp}</span>
+          <p className={`chat-message ${(message.sent) && "chat-reciever"}`}>{message.content}
+            <span className="chat-timestamp">{message.created}</span>
           </p>
         ))) : ""}
       </div>
