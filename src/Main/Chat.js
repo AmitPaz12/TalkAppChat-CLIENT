@@ -101,7 +101,7 @@ async function getContactInfo(){
     method: 'GET',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`},
   }
-  await fetch('https://localhost:7201/api/Contacts/' + roomId , requestOptions)
+  await fetch('https://localhost:7201/api/contacts/' + roomId , requestOptions)
     .then(response => response.json())
     .then(res => {
       ret = res;
@@ -124,7 +124,7 @@ async function getContactInfo(){
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem("jwt_token")}`},
     body: JSON.stringify({ content: input.inputField})
   }
-  await fetch('https://localhost:7201/api/Contacts/' + roomId + '/Messages/', requestOptions)
+  await fetch('https://localhost:7201/api/contacts/' + roomId + '/Messages/', requestOptions)
   .then(async response => {
     if (response.status === 201){
       ret = true;
@@ -139,7 +139,7 @@ async function getMessages(){
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`},
   }
 
-  await fetch('https://localhost:7201/api/Contacts/' + roomId + '/Messages/', requestOptions)
+  await fetch('https://localhost:7201/api/contacts/' + roomId + '/Messages/', requestOptions)
     .then(response => response.json())
     .then(responseJson => {messages = responseJson})
     .catch((error) => {messages = []});
