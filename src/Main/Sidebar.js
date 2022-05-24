@@ -73,7 +73,7 @@ async function postNewContact() {
   }
 
 
-  await fetch('https://localhost:7201/api/Contacts', requestOptions)
+  await fetch('https://localhost:7201/api/contacts', requestOptions)
   .then(async response => {
     console.log(response.status);
     if (response.status === 201){
@@ -99,7 +99,7 @@ async function inviteNewContact() {
     body: JSON.stringify({ from: user.userName, to: fieldData.idField, server: 'localhost:7201'})
   }
 
-  await fetch('https://' + fieldData.serverField + '/api/invitation', requestOptions)
+  await fetch('https://' + fieldData.serverField + '/api/invitations', requestOptions)
   .then(async response => {
     console.log(response.status);
     if(response.status === 201){
@@ -135,7 +135,7 @@ async function getContacts(){
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`},
     }
 
-    await fetch('https://localhost:7201/api/Contacts', requestOptions)
+    await fetch('https://localhost:7201/api/contacts', requestOptions)
       .then(async response => await response.json())
       .then(responseJson => {userContacts = responseJson})
       .catch((error) => {userContacts = []});
@@ -285,7 +285,7 @@ async function handleSubmit(){
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`},
     }
 
-    await fetch('https://localhost:7201/api/Contacts/' + input.inputField , requestOptions)
+    await fetch('https://localhost:7201/api/contacts/' + input.inputField , requestOptions)
       .then(async response => {
         if(response.status === 404)
           return;
