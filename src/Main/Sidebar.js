@@ -5,6 +5,7 @@ import { Modal } from 'react-bootstrap'
 import './Sidebar.css'
 import SidebarChat from './SidebarChat'
 import Image from 'react-bootstrap/Image'
+import {HubConnectionBuilder } from '@microsoft/signalr'
 
 function Sidebar() {
 
@@ -14,13 +15,48 @@ function Sidebar() {
   const [input, setInput] = useState({inputField:""});
   const [fieldData, setFieldData] = useState({idField: '', nameField: '', serverField: ''});
   const [isClosed, setIsClosed] = useState(false);
-  const [addChat, setAddChat] = useState(false);
   const [isLogout, setIsLogout] = useState(false);
   const [isRemoveContact, setIsRemoveContact] = useState(false);
   const searchBox = useRef(null);
   var [chatsList, setChatsList] = useState(null);
   var [contacts, setContacts] = useState(null);
   let navigate = useNavigate();
+
+
+  const contactsConnection = async () => {
+    try{
+      const connection = new HubConnectionBuilder()
+          .withUrl('https://localhost:7201/api/contactHub')
+          .build();
+
+      connection.on("ReceiveContact", (contact) => {
+        setChatsList(chatsList => [...chatsList, contact]);
+        setContacts(contacts => [...contacts, contact]);
+      });
+
+      connection.on("ContactUpdate", async (contactID) => {
+        console.log(chatsList);
+        var filtered = chatsList.filter(function(contact){ 
+          return contact.id !== contactID;
+      });
+        filtered = [...filtered, await getContacts()]
+        setChatsList(filtered);
+        setContacts(chatsList);
+      })
+
+      await connection.start();
+      await connection.invoke("ConnectClientToChat", user.userName);
+    }
+    catch(e) {console.log(e)}
+    setUser({...user,});
+  }
+
+  useEffect(() => {
+  async function fetchData() {
+    await contactsConnection()
+  }
+  fetchData();
+}, [])
 
 
 /**
@@ -45,6 +81,10 @@ async function postNewContact() {
     } else if (response.status === 400){
       setAddFieldError({contactExists: "You already have this contact. Please choose another"});
     }
+  })
+  .catch((error) => {
+    setAddFieldError({contactExists: "Something's wrong. Please try again"});
+    ret = false;
   });
   }
   return ret;
@@ -67,7 +107,10 @@ async function inviteNewContact() {
     }
     return await response.text();
   })
-  .then(text => {res = text});
+  .then(text => {res = text})
+  .catch((error) => {
+    setAddFieldError({contactExists: "Something went wrong. Please try again"});
+  });
 
   console.log(res);
   return res;
@@ -100,7 +143,7 @@ async function getContacts(){
       console.log(userContacts);
       setChatsList(userContacts);
       setContacts(userContacts);
-      setUser(user);
+      // setUser(user);
 }
 
 /**
@@ -112,7 +155,7 @@ useEffect(() => {
     await getContacts();
   }
   fetchData();
-},[isClosed, isRemoveContact])
+},[isClosed, isRemoveContact, user])
 
 
 // check validation of new contact's data
@@ -143,6 +186,8 @@ async function handleSubmit(){
   async function fetchData(){
    const response = await inviteNewContact();
    console.log(response);
+   if(response === null)
+     return false;
    const res = checkResponse(response);
    if (res === 1){
      console.log("res==1");
@@ -152,7 +197,6 @@ async function handleSubmit(){
    setAddFieldError({contactExists: response});
    return false;
  }
-
  return await fetchData()
 }
   
@@ -161,7 +205,6 @@ async function handleSubmit(){
   */
   const handleAdd = async () => {
     setAddFieldError(validate(fieldData));
-    console.log(addFieldError);
     if(Object.keys(addFieldError).length === 0){
       if(await handleSubmit()){
         console.log("Entered if")
@@ -309,9 +352,9 @@ async function handleSubmit(){
               <p>{addFieldError.nameField}</p>
               <input value={fieldData.serverField} onKeyPress={handleEnterAdd} onChange={handleAddChange} placeholder="Contact's server" name="serverField" type="text" autocomplete="off"/>
               <p>{addFieldError.serverField}</p>
+              <p>{addFieldError.contactExists}</p>
             </Modal.Body>
             <Modal.Footer>
-            <p>{addFieldError.contactExists}</p>
               <button onClick={handleAdd} type="button" class="btn btn-outline-primary">Add</button>
               <button onClick={handleClose} type="button" class="btn btn-outline-dark">Close</button>
             </Modal.Footer>
