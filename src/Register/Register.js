@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useContext} from 'react';
 import { Link } from "react-router-dom";
 import "./Register.css";
-import defaultProfilePic from "../ProfilePics/photo6.jpg";
+import userProfilePic from "../ProfilePics/photo1.png";
 import { UserContext } from '../UserContext'
 
 function Register() {
@@ -78,7 +78,7 @@ function Register() {
         console.log(userFromDB);
         if(userFromDB == null)
           return;
-          userFromDB.profilePic = defaultProfilePic;
+          userFromDB.profilePic = userProfilePic;
           console.log("before setUser");
         setUser(userFromDB)
       }

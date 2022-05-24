@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useContext} from 'react';
 import "./Login.css";
 import { Link } from "react-router-dom";
-import defaultProfilePic from "../ProfilePics/photo6.jpg";
+import userProfilePic from "../ProfilePics/photo1.png";
 import { UserContext } from '../UserContext'
 
 function Login() {
@@ -30,7 +30,7 @@ function Login() {
         const user = userTokenObject.user;
         localStorage.setItem("jwt_token", JWTtoken);
         console.log(user);
-        user.profilePic = defaultProfilePic;
+        user.profilePic = userProfilePic;
         setUser(user);
         return "Ok";
       }

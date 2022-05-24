@@ -7,6 +7,7 @@ import Image from 'react-bootstrap/Image'
 import defaultProfilePic from "../ProfilePics/photo6.jpg";
 // import Picker from 'emoji-picker-react'
 import { Modal } from 'react-bootstrap'
+import {HubConnectionBuilder } from '@microsoft/signalr'
 
 function Chat() {
 
@@ -72,10 +73,28 @@ function Chat() {
       return await response.text();
     })
     .then(text => {res = text});
+    setUser({...user,});
     return res;
   }
 
-  
+  const messagesConnection = async () => {
+    try{
+      const connection = new HubConnectionBuilder()
+          .withUrl('https://localhost:7201/api/messageHub')
+          .build();
+
+      connection.on("ReceiveMessage", (message) => {
+        setMessages(messages => [...messages, message]);
+          });
+
+      await connection.start();
+      await connection.invoke("ConnectClientToChat", {UserName: user.userName, ContactId: roomId});
+    }
+    catch(e) {console.log(e)}
+
+    setUser({...user,});
+  }
+
 async function getContactInfo(){
   let ret = null;
   const requestOptions = {
@@ -227,12 +246,22 @@ async function getMessages(){
     }
   }, [input]);
 
+  useEffect(() => {
+    setUser({...user,});
+  }, [messages]);
+
 
 useEffect(() => {
+  async function fetchData(){
+    setMessages( await getMessages())
+  }
+  fetchData();
   if(currentChat.id !== ''){
-    if(messages === [] && messages.at(-1)){
+    console.log(messages);
+    if(messages !== [] && messages.at(-1)){
+      console.log( messages.at(-1).created);
       setRoomName(currentChat.name);
-      setLastSeen("Last seen at: " + messages.at(-1).lastdate);
+      setLastSeen("Last seen at: " + messages.at(-1).created);
       setProfilePic(defaultProfilePic);
       setInput({inputField: ''});
     } else {
@@ -250,7 +279,8 @@ useEffect(() => {
     console.log(roomId);
     async function fetchData(){
       setCurrentChat(await getContactInfo())
-      setMessages(await getMessages())
+      await messagesConnection()
+      await getMessages()
     }
     fetchData();
   }
@@ -307,7 +337,6 @@ useEffect(() => {
         </div>
       </div>
       <div className="chat-body" id="chat-body">
-        {console.log(messages)}
         {messages ? (messages.map((message) => (
           <p className={`chat-message ${(message.sent) && "chat-reciever"}`}>{message.content}
             <span className="chat-timestamp">{message.created}</span>
