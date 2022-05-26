@@ -20,7 +20,7 @@ Start the client:
 
 ### Login
 
-In this screen you'll have to enter User-name and Password according to the Login infomation below.
+In this screen you'll have to enter User-name and Password.
 Click "Login" button and you'll automaticlly be transmitted to your chats.
 if you don't have an account - click "sign up" and you'll be transmitted to the Register screen.
 
@@ -33,16 +33,6 @@ if you already have an account - click "sign in" and you'll be transmitted to th
 ### Chats
 
 In this screen, you'll be able to see all your previous chats with your contacts.
-
-## Login information
-
-First option - 
-User-name: Yuval ,
-Password: Yuval12345
-
-Second option - 
-User-name: Asaf ,
-Password: Asaf12345
 
 ## Packages we used
 
