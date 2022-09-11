@@ -93,7 +93,7 @@ Main Chat:
    - username field: user name field should at least have a single letter.
  - password field: password field should follow the following regex `/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/` - meaning a password should have at least one number and letter, also should be at least at the size of eight.
    if one of the requirment wasn't met a coresponding error will be shown.
-   ![loginError](https://user-images.githubusercontent.com/92422861/189529716-a836f16b-aa31-4db8-bace-80285dec5a27.png)
+![loginError](https://user-images.githubusercontent.com/92422861/189529911-4832b52c-842d-4f43-85cb-d3278a1ab5b8.png)
 
   ## Recording:
   recording component will show a recording pop up to chat's footer allowing the user to record and upload a voice recording
