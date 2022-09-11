@@ -85,8 +85,8 @@ Main Chat:
  - image field - user should specify profile image.
  
  if one of the requirment wasn't met a coresponding error will be shown.
- ![image](https://user-images.githubusercontent.com/92247226/165350130-2eacfc6d-f8c8-413a-90b0-bdce64002326.png)
- 
+ ![reactRegisterWarning](https://user-images.githubusercontent.com/92422861/189529932-d10525b2-4124-457c-a89d-1f9bbf6acc14.png)
+
   ## Login:
   login component will allow an existing user to login and retrive existing chats.
   login form follows the folloiwing rules:
